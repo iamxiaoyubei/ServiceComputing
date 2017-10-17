@@ -180,5 +180,13 @@ func readByLine(inputReader *bufio.Reader, myArgus *argus) {
 }
 
 func check(err error) {
-  
+  if err != nil && err != io.EOF {
+    panic(err)
+  }
+}
+
+func processError(name string, errorStr string)  {
+  fmt.Fprint(os.Stderr, "%s: %s\n", name, errorStr)
+  flag.Usage()
+  os.Exit(1)
 }
