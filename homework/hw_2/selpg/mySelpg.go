@@ -148,5 +148,37 @@ func readByPage(inputReader *bufio.Reader, myArgus *argus)  {
 }
 
 func readByLine(inputReader *bufio.Reader, myArgus *argus) {
+  LineCount := 1
+  for {
+    line, err := inputReader.ReadString('\n')
+    check(err)
+
+    if LineCount > myArgus.pageLen*(myArgus.startPage-1) && LineCount <= myArgus.pageLen*myArgus.endPage {
+      if myArgus.desPrint == "" {
+        fmt.Printf(line)
+      } else {
+        cmd := exec.Command("./out")
+				echoInPipe, err := cmd.StdinPipe()
+				check(err)
+				echoInPipe.Write([]byte(line))
+				echoInPipe.Close()
+				cmd.Stdout = os.Stdout
+				cmd.Run()
+      }
+    }
+    if err == io.EOF {
+      break
+    }
+    LineCount++
+  }
+  if myArgus.startPage > LineCount/myArgus.pageLen+1 {
+    fmt.Printf("Warning:\n\tSTARTPAGE(%d) is greater than number of total pages(%d).\noutput will be empty.\n", myArgus.startPage, lineCount/myArgus.pageLen+1)
+  }
+  if myArgus.endPage > LineCount/myArgus.pageLen+1 {
+    fmt.Printf("Warning:\n\tENDPAGE(%d) is greater than number of total pages(%d).\nthere will be less output than expected.\n", myArgus.endPage, lineCount/myArgus.pageLen+1)
+  }
+}
+
+func check(err error) {
   
 }
