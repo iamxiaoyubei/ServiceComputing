@@ -77,3 +77,33 @@ func parseArgus(myArgus * argus) {
     }
   }
 }
+
+// fileProcess
+func fileProcess(myArgus *argus) {
+  // if user stipulate srcFile
+  if flag.NArg() {
+    myArgus.srcFile = flag.Arg(0)
+  }
+
+  if myArgus.srcFile == "" {
+    // if string is null, represents inputs are standard outputs
+    inputReader := bufio.NewReader(os.Stdin)
+
+    if myArgus.pageType == true {
+      readByPage(inputReader, myArgs)
+    } else {
+      readByLine(inputReader, myArgs)
+    }
+  } else {
+    inputFile, err := os.Open(myArgus.srcFile)
+    check(err)
+    inputReader := bufio.NewReader(inputFile)
+    defer inputFile.Close()
+
+    if myArgus.pageType == true {
+      readByPage(inputReader, myArgs)
+    } else {
+      readByLine(inputReader, myArgs)
+    }
+  }
+}
