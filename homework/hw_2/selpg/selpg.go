@@ -14,6 +14,7 @@ Author: Yubei Xiao
 /*================================= package ======================*/
 package main
 
+/*================================= import ======================*/
 import (
 	"bufio"
 	"flag"
@@ -23,8 +24,6 @@ import (
 	"os"
 	"os/exec"
 )
-
-/*================================= import ======================*/
 
 /*================================= types =========================*/
 
@@ -40,8 +39,8 @@ type selpgArgs struct {
 /*================================= globals =======================*/
 
 var progname string /* program name, for error messages */
-const MAXUInt = ^uint(0)
-const INT_MAX = math.MaxInt64
+//const MAXUInt = ^uint(0)
+const INT_MAX = math.MaxInt64 /* MaxInt64 */
 
 /*================================= main ====================*/
 // func main must have no arguments and return values
