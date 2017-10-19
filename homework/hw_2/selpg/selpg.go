@@ -63,7 +63,7 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 
 	/* check the command-line arguments for validity */
 	if ac < 3 {
-		fmt.Fprint(os.Stderr, "%s: %s\n", progname, "not enough arguments")
+		fmt.Fprintf(os.Stderr, "%s: %s\n", progname, "not enough arguments")
 		usage()
 		os.Exit(1)
 	}
@@ -82,14 +82,14 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 
 	/* handle 1st arg - start page */
 	if psa.startPage < 0 || psa.startPage > (INT_MAX-1) {
-		fmt.Fprint(os.Stderr, "%s: %s\n", progname, "invalid start page")
+		fmt.Fprintf(os.Stderr, "%s: %s\n", progname, "invalid start page")
 		usage()
 		os.Exit(2)
 	}
 
 	/* handle 2nd arg - end page */
 	if psa.endPage < 0 || psa.endPage > (INT_MAX-1) || psa.endPage < psa.startPage {
-		fmt.Fprint(os.Stderr, "%s: %s\n", progname, "invalid end page")
+		fmt.Fprintf(os.Stderr, "%s: %s\n", progname, "invalid end page")
 		usage()
 		os.Exit(3)
 	}
@@ -97,7 +97,7 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 	/* now handle optional args */
 	if psa.pageType == true {
 		if psa.pageLen != -1 {
-			fmt.Fprint(os.Stderr, "%s: %s\n", progname, "-f and -l=PageLen are mutually-exclusive")
+			fmt.Fprintf(os.Stderr, "%s: %s\n", progname, "-f and -l=PageLen are mutually-exclusive")
 		}
 	} else {
 		if psa.pageLen < 1 {
@@ -105,7 +105,6 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 		}
 	}
 
-	fmt.Println(flag.NArg())
 	if flag.NArg() == 1 {
 		psa.inFilename = flag.Arg(0)
 	} else {
@@ -117,7 +116,6 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 
 func processInput(sa selpgArgs) {
 	/* process the input source */
-	fmt.Println(sa.inFilename)
 	if sa.inFilename == "" {
 		// input from cmd
 		var inputReader = bufio.NewReader(os.Stdin)
@@ -228,7 +226,7 @@ func readByLine(inputReader *bufio.Reader, myArgus selpgArgs) {
 /*================================= usage() =======================*/
 
 func usage() {
-	fmt.Fprint(os.Stderr, "%s: %s\n", progname, "\n[USAGE] -sstart_page -eend_page [ -f | -llines_per_page ] [ -ddest ] [ in_filename ]\n")
+	fmt.Fprintf(os.Stderr, "%s: %s\n", progname, "\n[USAGE] -sstart_page -eend_page [ -f | -llines_per_page ] [ -ddest ] [ in_filename ]\n")
 }
 
 /*================================= EOF ===========================*/
