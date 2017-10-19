@@ -38,8 +38,7 @@ type selpgArgs struct {
 
 /*================================= globals =======================*/
 
-var progname string /* program name, for error messages */
-//const MAXUInt = ^uint(0)
+var progname string           /* program name, for error messages */
 const INT_MAX = math.MaxInt64 /* MaxInt64 */
 
 /*================================= main ====================*/
@@ -47,15 +46,6 @@ const INT_MAX = math.MaxInt64 /* MaxInt64 */
 // we use os.Args as command-line args and use flag to parse args
 func main() {
 	var sa selpgArgs
-
-	/* save name by which program is invoked, for error messages */
-	progname = os.Args[0]
-
-	// initial args
-	sa.startPage = -1
-	sa.endPage = -1
-	sa.pageLen = 72
-	sa.pageType = false
 
 	processArgs(len(os.Args), os.Args, &sa)
 	processInput(sa)
@@ -77,6 +67,9 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 		usage()
 		os.Exit(1)
 	}
+
+	/* save name by which program is invoked, for error messages */
+	progname = os.Args[0]
 
 	/* handle mandatory args first */
 	// var temp selpgArgs
@@ -102,15 +95,9 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 	}
 
 	/* now handle optional args */
-	if psa.pageLen < 0 || psa.pageLen > (INT_MAX-1) {
-		fmt.Fprint(os.Stderr, "%s: %s\n", progname, "invalid page length")
-		usage()
-		os.Exit(4)
-	}
-
 	if psa.pageType == true {
 		if psa.pageLen != -1 {
-			fmt.Fprint(os.Stderr, "%s: %s\n", progname, "option should be \"-f\"")
+			fmt.Fprint(os.Stderr, "%s: %s\n", progname, "-f and -l=PageLen are mutually-exclusive")
 		}
 	} else {
 		if psa.pageLen < 1 {
@@ -118,8 +105,11 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 		}
 	}
 
-	if flag.NArg() > 0 {
+	fmt.Println(flag.NArg())
+	if flag.NArg() == 1 {
 		psa.inFilename = flag.Arg(0)
+	} else {
+		psa.inFilename = ""
 	}
 }
 
@@ -127,7 +117,8 @@ func processArgs(ac int, av []string, psa *selpgArgs) {
 
 func processInput(sa selpgArgs) {
 	/* process the input source */
-	if sa.inFilename != "" {
+	fmt.Println(sa.inFilename)
+	if sa.inFilename == "" {
 		// input from cmd
 		var inputReader = bufio.NewReader(os.Stdin)
 		//processOutput(inputReader, sa)
@@ -139,12 +130,12 @@ func processInput(sa selpgArgs) {
 	} else {
 		// input from file
 		inputFile, err := os.Open(sa.inFilename)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			panic(err)
 		}
 		var inputReader = bufio.NewReader(inputFile)
 		defer inputFile.Close()
-		//processOutput(inputReader, sa)
+
 		if sa.pageType {
 			readByPage(inputReader, sa)
 		} else {
@@ -155,21 +146,13 @@ func processInput(sa selpgArgs) {
 
 /*================================= process_output() ===============*/
 
-// func processOutput(inputReader *bufio.Reader, sa selpgArgs) {
-// 	/* process the output source and to different output type*/
-// 	if sa.pageType {
-// 		readByPage()
-// 	} else {
-// 		readByLine()
-// 	}
-// }
 func readByPage(inputReader *bufio.Reader, myArgus selpgArgs) {
 	// record pageCount
 	pageCount := 1
 	// read all pages
 	for {
 		page, err := inputReader.ReadString('\f')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			panic(err)
 		}
 		// when page number in the chosen range
@@ -181,7 +164,7 @@ func readByPage(inputReader *bufio.Reader, myArgus selpgArgs) {
 				// open ./go input pipe, and output to pipe
 				cmd := exec.Command("./out")
 				echoInPipe, err := cmd.StdinPipe()
-				if err != nil {
+				if err != nil && err != io.EOF {
 					panic(err)
 				}
 				echoInPipe.Write([]byte(page + "\n"))
@@ -210,7 +193,7 @@ func readByLine(inputReader *bufio.Reader, myArgus selpgArgs) {
 	lineCount := 1
 	for {
 		line, err := inputReader.ReadString('\n')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			panic(err)
 		}
 
@@ -220,7 +203,7 @@ func readByLine(inputReader *bufio.Reader, myArgus selpgArgs) {
 			} else {
 				cmd := exec.Command("./out")
 				echoInPipe, err := cmd.StdinPipe()
-				if err != nil {
+				if err != nil && err != io.EOF {
 					panic(err)
 				}
 				echoInPipe.Write([]byte(line))
